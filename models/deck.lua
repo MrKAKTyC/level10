@@ -30,8 +30,7 @@ end
 function Deck:shuffle()
     local shuffled = {}
     while #self.cards > 0 do
-        -- local index = love.math.random(1, #self.cards)
-        local index = math.random(1, #self.cards)
+        local index = love.math.random(1, #self.cards)
         table.insert(shuffled, table.remove(self.cards, index))
     end
     self.cards = shuffled
@@ -39,7 +38,7 @@ end
 
 ---@return Card
 function Deck:drawCard()
-    return table.remove(self.cards)
+    return table.remove(self.cards, 1)
 end
 
 return Deck

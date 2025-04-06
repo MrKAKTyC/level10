@@ -2,6 +2,8 @@
 --- @field worlds table<WorldType, Card[]>
 --- @field restarts table<WorldType, Card[]>
 --- @field currentLevel integer
+--- @field currentLevelRestarted boolean
+--- @field worldCardsTotal integer
 Universe = {}
 Universe.__index = Universe
 
@@ -29,6 +31,8 @@ function Universe:new()
         end
     end
     universe.currentLevel = 1
+    universe.currentLevelRestarted = false
+    universe.worldCardsTotal = 0
     return universe
 end
 
@@ -50,13 +54,15 @@ function Universe:restartWorld(worldType)
     end
     
     table.insert(self.worlds[worldType], table.remove(self.restarts[worldType], #self.restarts[worldType]))
+    self.currentLevelRestarted = true
     self:validateIsLevelDone()
     return true
 end
 
+---Check if given card can be placed in corresponding world
 ---@param card Card
 ---@return boolean
-function Universe:placeCard(card)
+function Universe:canBePlaced(card)
     -- Check if it's valid move
     -- 1. Based pn previous card in this world
     -- 2. Based on if other worlds have restart card
@@ -81,6 +87,15 @@ function Universe:placeCard(card)
         print('Invalid move', 'restart required')
         return false
     end
+    return true
+end
+
+---@param card Card
+---@return boolean
+function Universe:placeCard(card)
+    if not self:canBePlaced(card) then
+        return false
+    end
     table.insert(self.worlds[card.suit], card)
     self:validateIsLevelDone()
     return true
@@ -93,7 +108,14 @@ function Universe:validateIsLevelDone()
     end
     if sum / 5 == self.currentLevel then
         self.currentLevel = self.currentLevel + 1
+        self.currentLevelRestarted = false
     end
+
+    local cardsCount = 0
+    for _, wCards in pairs(self.worlds) do
+        cardsCount = cardsCount + #wCards
+    end
+    self.worldCardsTotal = cardsCount
 end
 
 return Universe
